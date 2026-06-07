@@ -96,7 +96,15 @@ function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiamete
           )
         ),
         // hager mount width should be at least 45mm
-        translate([innerLength/2 + wallThickness - 15 - 15/2, innerWidth/2 + wallThickness, - 5 - 3 + holeWallHeight + innerHeight/2  + wallThickness],
+        translate([innerLength/2 + wallThickness - 15 - 15/2, innerWidth/2 + wallThickness - 0.5, - 5 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
+          union(
+            rotate([0, Math.PI/2, 0],
+              cylinder({ radius: 2, height: 10, segments: 32 })
+            )
+          )
+        ),
+        // hager mount width should be at least 45mm
+        translate([innerLength/2 + wallThickness - 30 - 15/2, innerWidth/2 + wallThickness - 0.25, - 5 - 3.5 + holeWallHeight + innerHeight/2  + wallThickness],
           union(
             rotate([0, Math.PI/2, 0],
               cylinder({ radius: 2, height: 10, segments: 32 })
