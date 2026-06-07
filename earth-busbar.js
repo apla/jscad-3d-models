@@ -1,7 +1,7 @@
 const { booleans, primitives, transforms } = require('@jscad/modeling');
 const { subtract, union } = booleans;
 const { cuboid, cylinder } = primitives;
-const { translate, rotateX, rotateZ, rotate } = transforms;
+const { translate, rotateX, rotateY, rotateZ, rotate } = transforms;
 
 function parseHoleSpacing(spacingInput, defaultValue) {
   try {
@@ -104,7 +104,14 @@ function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiamete
           )
         ),
         // hager mount width should be at least 45mm
-        translate([innerLength/2 + wallThickness - 30 - 15/2, innerWidth/2 + wallThickness - 0.25, - 5 - 3.5 + holeWallHeight + innerHeight/2  + wallThickness],
+        // translate([innerLength/2 + wallThickness - 30 - 15/2, innerWidth/2 + wallThickness - 0.25, - 5 - 3.5 + holeWallHeight + innerHeight/2  + wallThickness],
+        //   union(
+        //     rotate([0, Math.PI/2, 0],
+        //       cylinder({ radius: 2, height: 10, segments: 32 })
+        //     )
+        //   )
+        // ),
+        translate([-(HagerMountDistanceBetween/2 - 15 - 15/2), innerWidth/2 + wallThickness - 0.25, - 5 - 3.5 + holeWallHeight + innerHeight/2  + wallThickness],
           union(
             rotate([0, Math.PI/2, 0],
               cylinder({ radius: 2, height: 10, segments: 32 })
@@ -196,14 +203,18 @@ function main (params) {
   const wireMode = "passThrough";
   const screwMode = {protruding: true, block: true};
   
-  return groundingBarShell({
-    innerLength,
-    wireMode,
-    screwMode,
-    ...params,
-    holeWallHeight,
+  return [
+    rotateY(Math.PI, groundingBarShell({
+      innerLength,
+      wireMode,
+      screwMode,
+      ...params,
+      holeWallHeight,
     
-  });
+    })), translate([0, innerLength, 0],
+      cuboid({size: [params.innerHeight, params.innerWidth, params.wallThickness]})
+    )
+  ];
 }
 
 function mainX (params) {
