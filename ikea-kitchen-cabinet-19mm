@@ -1,0 +1,62 @@
+"use strict"
+const jscad = require('@jscad/modeling')
+const { intersect, subtract, union } = jscad.booleans
+const { colorize } = jscad.colors
+const { cuboid, sphere, cylinder } = jscad.primitives
+const { translate, rotate } = jscad.transforms
+
+function main() {
+  const shell = translate([0, 0, 30/2], 
+      subtract(
+        cuboid({ size: [60+19, 60, 30] })
+      )
+  );
+  const pin = translate([-19/2, 0, -15],
+      cylinder({ radius: 3.75, height: 30 })
+    );
+  const outer = union(
+    translate([0, 0, -30], 
+      subtract(
+        cuboid({ size: [60+19, 60, 60] }),
+        translate([19/2, 0, -10], cuboid({ size: [19, 60, 40] })),
+        translate([-19/2, 0, -10], cuboid({ size: [19, 60, 40] })),
+        translate([25, 0, 16], rotate([0, 0, Math.PI/2], cuboid({ size: [10, 30, 10] }))),
+      )
+    ),
+    pin,
+    translate([19/2, 0, 15],
+      cylinder({ radius: 20, height: 30 })
+    ),
+    shell
+  )
+  const holesTop = 
+    union(
+    translate([19/2, 0, 20/2],
+      cylinder({ radius: 11.1, height: 40 })
+    ),
+    translate([19/2, 0, 0],
+      cylinder({ radius: 5, height: 100 })
+    )
+  );
+  const holesTop = 
+    union(
+    translate([19/2, 0, 20/2],
+      cylinder({ radius: 11.1, height: 40 })
+    ),
+    translate([19/2, 0, 0],
+      cylinder({ radius: 5, height: 100 })
+    )
+  );
+
+  const complete = subtract(
+    outer, 
+    holesTop,
+    holesSide
+  );
+  return [
+    colorize([0.65, 0.25, 0.8], complete),
+    // colorize([0.7, 0.7, 0.1], inner),
+  ]
+}
+
+module.exports = { main }
