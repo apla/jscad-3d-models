@@ -51,13 +51,18 @@ function getHolePositions(holeCount, parsedSpacing) {
 }
 
 
-function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiameter, holeSpacing, holeCount, holeWallThickness, holeWallHeight, screwdriverD, innerLength, wireMode, screwMode, haveHagerMounts}) {
+function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiameter, holeSpacing, holeCount, holeWallThickness, holeWallHeight, screwdriverD, innerLength, wireMode, screwMode, haveHagerMounts, innerExtra}) {
+  const [innerExtraDepth, innerExtraHeight] = innerExtra;
   const outerW = innerWidth  + wallThickness * 2;
   const outerD = innerHeight  + wallThickness * 2 + (screwMode.block ? holeWallHeight : 0);
 
   const outer = translate(
-    [0, 0, screwMode.block ? holeWallHeight/2 : 0],
-    cuboid({ size: [innerLength + wallThickness * 2, outerW, outerD] })
+    [0, -innerExtraDepth/2, innerExtraHeight/2 + (screwMode.block ? holeWallHeight/2 : 0)],
+    cuboid({ size: [
+      innerLength + wallThickness * 2,
+      outerW + innerExtraDepth,
+      outerD + innerExtraHeight
+    ] })
   );
   const inner = cuboid({ size: [innerLength + wallThickness, innerWidth, innerHeight] });
   let shell = subtract(outer, translate([wallThickness, 0, 0], inner));
@@ -83,12 +88,14 @@ function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiamete
       const HagerMountDistanceBetween = 15 * (hagerMountDistanceMultiplier + 1) - hagerMountWidth * 2;
       
       shell = union(shell, 
+        // leg 1
         translate([innerLength/2 + wallThickness - hagerMountWidth/2, 7/2 + innerWidth/2 + wallThickness, - 5/2 + holeWallHeight + innerHeight/2  + wallThickness],
           union(
             cuboid({size: [hagerMountWidth, 7, 5]}),
             translate([0, 2, -6.5], cuboid({size: [hagerMountWidth, 3, 8]}))
           )
         ),
+        // leg 2
         translate([-(HagerMountDistanceBetween/2 - hagerMountWidth/2), 7/2 + innerWidth/2 + wallThickness, - 5/2 + holeWallHeight + innerHeight/2  + wallThickness],
           union(
             cuboid({size: [hagerMountWidth, 7, 5]}),
@@ -162,6 +169,33 @@ function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiamete
 function getParameterDefinitions () {
   return [
     {name: 'bar_brass_group', type: 'group', caption: 'Bar brass'},
+    {name: 'innerWidth', caption: 'Brass bar width:', type: 'float', step: 0.1, initial: 10},
+    {name: 'innerLength', caption: 'Brass bar length:', type: 'float', step: 0.1, initial: 27},
+    {name: 'innerHeight', caption: 'Brass bar height:', type: 'float', step: 0.1, initial: 11},
+    {name: 'wallThickness', caption: 'Wall Thickness:', type: 'float', step: 0.1, initial: 2},
+
+    {name: 'holes_group', type: 'group', caption: 'Holes'},
+    {name: 'holeDiameter', caption: 'Hole diameter:', type: 'float', step: 0.1, initial: 8.5},
+    {name: 'holeSpacing', caption: 'Hole spacing (number or array like [10, 20]):', type: 'string', initial: "8"},
+    {name: 'holeCount', caption: 'Hole count:', type: 'float', step: 1, initial: 3},
+    {name: 'holeWallThickness', caption: 'Hole protection wall thickness:', type: 'float', step: 0.1, initial: 1},
+    {name: 'holeWallHeight', caption: 'Hole protection wall H:', type: 'float', step: 0.1, initial: 5},
+    {name: 'screwdriverD', caption: 'Screwdriver diameter:', type: 'float', step: 0.1, initial: 7},
+
+    {name: 'hager_group', type: 'group', caption: 'Hager'},
+    {name: 'haveHagerMounts', caption: 'Use Hager mounts:', type: 'checkbox', initial: true},
+    // {name: 'holeSpacing', caption: 'Hole spacing (number or array like [10, 20]):', type: 'string', initial: "8.5"},
+    // {name: 'holeCount', caption: 'Hole count:', type: 'float', step: 1, initial: 12},
+    // {name: 'holeWallThickness', caption: 'Hole protection wall thickness:', type: 'float', step: 0.1, initial: 1},
+    // {name: 'holeWallHeight', caption: 'Hole protection wall H:', type: 'float', step: 0.1, initial: 5},
+    // {name: 'screwdriverD', caption: 'Screwdriver diameter:', type: 'float', step: 0.1, initial: 7},
+
+   ];
+}
+
+function getParameterDefinitionsX () {
+  return [
+    {name: 'bar_brass_group', type: 'group', caption: 'Bar brass'},
     {name: 'innerWidth', caption: 'Brass bar width:', type: 'float', step: 0.1, initial: 6.5},
     {name: 'innerLength', caption: 'Brass bar length:', type: 'float', step: 0.1, initial: 108},
     {name: 'innerHeight', caption: 'Brass bar height:', type: 'float', step: 0.1, initial: 9},
@@ -186,6 +220,7 @@ function getParameterDefinitions () {
    ];
 }
 
+
 function main (params) {
   const defaultHoleSpacing = 9;
   const parsedSpacing = parseHoleSpacing(params.holeSpacing, defaultHoleSpacing);
@@ -202,18 +237,53 @@ function main (params) {
   const innerLength = Math.max(totalLength, params.innerLength);
   const wireMode = "passThrough";
   const screwMode = {protruding: true, block: true};
-  
-  return [
-    rotateY(Math.PI, groundingBarShell({
+
+  // const innerExtra = [10, 10.5];
+  const innerExtra = [10, 0];
+
+  const bar = groundingBarShell({
       innerLength,
       wireMode,
       screwMode,
       ...params,
       holeWallHeight,
-    
-    })), translate([0, innerLength, 0],
-      cuboid({size: [params.innerHeight, params.innerWidth, params.wallThickness]})
+      innerExtra,
+    });
+
+  const barCutExtra = union(subtract(
+    bar,
+    translate([params.wallThickness, 0, 0], union(
+      translate([0, -4.6, 9.2], cuboid({size: [innerLength + params.wallThickness, 19.2, 7.5]})),
+      translate([0, -9.45, 16.4], cuboid({size: [innerLength + params.wallThickness, 9.5, 7]})),
+    )),
+    union(
+      translate([9, -9.45, 28], cylinder({ radius: 5.5/2, height: 40, segments: 32 })),
+      translate([3, -9.45, 28], cylinder({ radius: 5.5/2, height: 40, segments: 32 })),
+      translate([-3, -9.45, 28], cylinder({ radius: 5.5/2, height: 40, segments: 32 })),
+      translate([-9, -9.45, 28], cylinder({ radius: 5.5/2, height: 40, segments: 32 })),
+    ),
+    union(
+      translate([9, -11, 12], rotateX(Math.PI/2, cylinder({ radius: 5.5/2, height: 12, segments: 32 }))),
+      translate([3, -11, 12], rotateX(Math.PI/2, cylinder({ radius: 5.5/2, height: 12, segments: 32 }))),
+      translate([-3, -11, 12], rotateX(Math.PI/2, cylinder({ radius: 5.5/2, height: 12, segments: 32 }))),
+      translate([-9, -11, 12], rotateX(Math.PI/2, cylinder({ radius: 5.5/2, height: 12, segments: 32 }))),
     )
+  ),
+    
+    // union(
+    //   translate([9, -11, 28], rotateX(Math.PI/2, cylinder({ radius: 5.5/2, height: 12, segments: 32 }))),
+    //   translate([3, -9.45, 28], cylinder({ radius: 5.5/2, height: 40, segments: 32 })),
+    //   translate([-3, -9.45, 28], cylinder({ radius: 5.5/2, height: 40, segments: 32 })),
+    //   translate([-9, -9.45, 28], cylinder({ radius: 5.5/2, height: 40, segments: 32 })),
+    // )
+
+  );
+  
+  return [
+    rotateY(Math.PI, barCutExtra),
+    // translate([0, innerLength, 0],
+    //   cuboid({size: [params.innerHeight, params.innerWidth, params.wallThickness]})
+    // )
   ];
 }
 
