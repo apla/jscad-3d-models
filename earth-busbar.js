@@ -185,6 +185,33 @@ const templates = {
     holeWallHeight: 5,
     screwdriverD: 7,
   },
+  simple7: {
+    innerWidth: 8,
+    innerLength: 62,
+    innerHeight: 13,
+    wallThickness: 3,
+
+    holeDiameter: 6,
+    holeSpacing: "[7.5, 10, 7.5, 7.5, 7.5, 10, 7.5]",
+    holeCount: 7,
+    holeWallThickness: 0.8,
+    holeWallHeight: 5,
+    screwdriverD: 7,
+  },
+  simple15: {
+    innerWidth: 7,
+    innerLength: 124,
+    innerHeight: 11,
+    wallThickness: 3,
+
+    holeDiameter: 7,
+    holeSpacing: "8",
+    holeCount: 15,
+    holeWallThickness: 0.8,
+    holeWallHeight: 5,
+    screwdriverD: 7.25,
+    
+  },
   "two-level": {
     innerWidth: 10,
     innerLength: 27,
@@ -202,7 +229,7 @@ const templates = {
   }
 };
 
-const defaultTemplateName = "two-level";
+const defaultTemplateName = "simple7";
 const defaults = templates[defaultTemplateName];
 
 function getParameterDefinitions () {
@@ -285,9 +312,9 @@ function main (params) {
   
   return [
     rotateY(Math.PI, bar),
-    // translate([0, innerLength, 0],
-    //   cuboid({size: [params.innerHeight, params.innerWidth, params.wallThickness]})
-    // )
+    translate([0, innerLength, 0],
+      cuboid({size: [params.innerHeight, params.innerWidth, params.wallThickness]})
+    )
   ];
 }
 
