@@ -85,36 +85,44 @@ function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiamete
       // ex mount + distance + mount be in range [30, 45, 60]
       const hagerMountWidth = 9.8;
       const hagerMountDistanceMultiplier = Math.trunc((innerLength + wallThickness * 2) / 15);
-      const HagerMountDistanceBetween = 15 * (hagerMountDistanceMultiplier + 1) - hagerMountWidth * 2;
+      const hagerMountDistanceBetween = 15 * (hagerMountDistanceMultiplier + 1) - hagerMountWidth * 2;
+      const hagerMountPosX = -1;
       
       shell = union(shell, 
         // leg 1
-        translate([innerLength/2 + wallThickness - hagerMountWidth/2, 7/2 + innerWidth/2 + wallThickness, - 5/2 + holeWallHeight + innerHeight/2  + wallThickness],
+        translate([hagerMountPosX * (innerLength/2 + wallThickness - hagerMountWidth/2), 7/2 + innerWidth/2 + wallThickness, - 5/2 + holeWallHeight + innerHeight/2  + wallThickness],
           union(
             cuboid({size: [hagerMountWidth, 7, 5]}),
             translate([0, 2, -6.5], cuboid({size: [hagerMountWidth, 3, 8]}))
           )
         ),
         // leg 2
-        translate([-(HagerMountDistanceBetween/2 - hagerMountWidth/2), 7/2 + innerWidth/2 + wallThickness, - 5/2 + holeWallHeight + innerHeight/2  + wallThickness],
+        translate([-1 * hagerMountPosX * (hagerMountDistanceBetween/2 - hagerMountWidth/2), 7/2 + innerWidth/2 + wallThickness, - 5/2 + holeWallHeight + innerHeight/2  + wallThickness],
           union(
             cuboid({size: [hagerMountWidth, 7, 5]}),
             translate([0, 2, -6.5], cuboid({size: [hagerMountWidth, 3, 8]}))
           )
         ),
         // ears on top
-        translate([innerLength/2 + wallThickness - 1.5/2, - 4/2 + innerWidth/2 + wallThickness, - 2.5/2 - innerHeight/2  - wallThickness],
+        translate([hagerMountPosX*(innerLength/2 + wallThickness - 1.5/2), - 4/2 + innerWidth/2 + wallThickness, - 2.5/2 - innerHeight/2  - wallThickness],
           cuboid({size: [1.5, 4, 2.5]})
         ),
-        translate([-(HagerMountDistanceBetween/2 - 1.5/2), - 4/2 + innerWidth/2 + wallThickness, - 2.5/2 - innerHeight/2  - wallThickness],
+        translate([-1 * hagerMountPosX * (hagerMountDistanceBetween/2 - 1.5/2), - 4/2 + innerWidth/2 + wallThickness, - 2.5/2 - innerHeight/2  - wallThickness],
           cuboid({size: [1.5, 4, 2.5]})
         ),
         // lock #1
         // hager mount width should be at least 45mm
-        translate([innerLength/2 + wallThickness - 15 - 15/2, innerWidth/2 + wallThickness - 0.5, - 5 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
+        // translate([hagerMountPosX * (innerLength/2 + wallThickness - 15 - 15/2), innerWidth/2 + wallThickness - 0.5, - 5 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
+        //   union(
+        //     rotate([0, Math.PI/2, 0],
+        //       cylinder({ radius: 1.5, height: 6, segments: 32 })
+        //     )
+        //   )
+        // ),
+        translate([hagerMountPosX * (innerLength/2 + wallThickness - 15 - 15/2), innerWidth/2 + wallThickness - 0.99, - 3 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
           union(
             rotate([0, Math.PI/2, 0],
-              cylinder({ radius: 1.5, height: 6, segments: 32 })
+              cylinder({ radius: 2.5, height: 6, segments: 32 })
             )
           )
         ),
@@ -127,15 +135,48 @@ function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiamete
         //   )
         // ),
         // lock #2
-        translate([-(HagerMountDistanceBetween/2 - 15 - 15/2), innerWidth/2 + wallThickness - 0.25, - 5 - 3.5 + holeWallHeight + innerHeight/2  + wallThickness],
+        // translate([-1 * hagerMountPosX * (hagerMountDistanceBetween/2 - 15 - 15/2), innerWidth/2 + wallThickness - 0.25, - 5 - 3.5 + holeWallHeight + innerHeight/2  + wallThickness],
+        //   union(
+        //     rotate([0, Math.PI/2, 0],
+        //       cylinder({ radius: 1.5, height: 6, segments: 32 })
+        //     )
+        //   )
+        // ),
+        translate([-1 * hagerMountPosX * (hagerMountDistanceBetween/2 - 15 - 15/2), innerWidth/2 + wallThickness - 0.99, - 3 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
           union(
             rotate([0, Math.PI/2, 0],
-              cylinder({ radius: 1.5, height: 6, segments: 32 })
+              cylinder({ radius: 2.5, height: 6, segments: 32 })
             )
           )
         ),
       );
 
+      shell = subtract(shell, 
+        translate([hagerMountPosX * (innerLength/2 + wallThickness - 15 - 15/2), innerWidth/2 + wallThickness - 0.5, - 4 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
+          union(
+            translate([0, 1.5, 3], cuboid({ size: [6, 2, 3] })),
+          )
+        ),
+        translate([-1 * hagerMountPosX * (hagerMountDistanceBetween/2 - 15 - 15/2), innerWidth/2 + wallThickness - 0.5, - 4 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
+          union(
+            translate([0, 1.5, 3], cuboid({ size: [6, 2, 3] })),
+          )
+        ),
+        translate([hagerMountPosX * (innerLength/2 + wallThickness - 15 - 15/2), innerWidth/2 + wallThickness - 0.5, - 5 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
+          union(
+            translate([3, 0, 0], cuboid({ size: [1, 4, 18] })),
+            translate([-3, 0, 0], cuboid({ size: [1, 4, 18] })),
+            translate([0, -2, 0], cuboid({ size: [7, 1, 18] })),
+          )
+        ),
+        translate([-1 * hagerMountPosX * (hagerMountDistanceBetween/2 - 15 - 15/2), innerWidth/2 + wallThickness - 0.5, - 5 - 4 + holeWallHeight + innerHeight/2  + wallThickness],
+          union(
+            translate([3, 0, 0], cuboid({ size: [1, 4, 18] })),
+            translate([-3, 0, 0], cuboid({ size: [1, 4, 18] })),
+            translate([0, -2, 0], cuboid({ size: [7, 1, 18] })),
+          )
+        ),
+      );
       
     }
 
@@ -187,14 +228,14 @@ const templates = {
   },
   simple7: {
     innerWidth: 8,
-    innerLength: 62,
+    innerLength: 65,
     innerHeight: 13,
-    wallThickness: 3,
+    wallThickness: 4,
 
     holeDiameter: 6,
     holeSpacing: "[7.5, 10, 7.5, 7.5, 7.5, 10, 7.5]",
     holeCount: 7,
-    holeWallThickness: 0.8,
+    holeWallThickness: 0.5,
     holeWallHeight: 5,
     screwdriverD: 7,
   },
