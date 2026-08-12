@@ -51,7 +51,7 @@ function getHolePositions(holeCount, parsedSpacing) {
 }
 
 
-function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiameter, holeSpacing, holeCount, holeWallThickness, holeWallHeight, screwdriverD, innerLength, wireMode, screwMode, haveHagerMounts, innerExtra}) {
+function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiameter, holeSpacing, ferruleIsolation, holeCount, holeWallThickness, holeWallHeight, screwdriverD, innerLength, wireMode, screwMode, haveHagerMounts, innerExtra}) {
   const [innerExtraDepth, innerExtraHeight] = innerExtra;
   const outerW = innerWidth  + wallThickness * 2;
   const outerD = innerHeight  + wallThickness * 2 + (screwMode.block ? holeWallHeight : 0);
@@ -202,7 +202,10 @@ function groundingBarShell ({innerWidth, innerHeight, wallThickness, holeDiamete
       [x, yOffset, 0],
       rotateX(
         Math.PI/2,
-        cylinder({ radius: holeRadius, height: holeDepth + 2 + holeHeight, segments: 32 })
+        union(
+          cylinder({ radius: holeRadius, height: holeDepth + 2 + holeHeight, segments: 32 }),
+          ferruleIsolation ? cylinder({ radius: holeRadius+ferruleIsolation, center: [0, 0, (holeDepth + 2 + holeHeight)/2 + innerWidth/2 + 1], height: holeDepth + 2 + holeHeight, segments: 32 }): null,
+        )
       )
     );
     shell = union(shell, screwHoleWall);
@@ -221,6 +224,7 @@ const templates = {
 
     holeDiameter: 6,
     holeSpacing: "8.5",
+    ferruleIsolation: 2,
     holeCount: 12,
     holeWallThickness: 1,
     holeWallHeight: 5,
@@ -234,6 +238,7 @@ const templates = {
 
     holeDiameter: 6,
     holeSpacing: "[7.5, 10, 7.5, 7.5, 7.5, 10, 7.5]",
+    ferruleIsolation: 2,
     holeCount: 7,
     holeWallThickness: 0.5,
     holeWallHeight: 5,
@@ -284,6 +289,7 @@ function getParameterDefinitions () {
     {name: 'holes_group', type: 'group', caption: 'Holes'},
     {name: 'holeDiameter', caption: 'Hole diameter:', type: 'float', step: 0.1, initial: defaults.holeDiameter},
     {name: 'holeSpacing', caption: 'Hole spacing (number or array like [10, 20]):', type: 'string', initial: defaults.holeSpacing},
+    {name: 'ferruleIsolation', caption: 'Ferrule isolation gap:', type: 'float', step: 0.1, initial: defaults.ferruleIsolation},
     {name: 'holeCount', caption: 'Hole count:', type: 'float', step: 1, initial: defaults.holeCount},
     {name: 'holeWallThickness', caption: 'Hole protection wall thickness:', type: 'float', step: 0.1, initial: defaults.holeWallThickness},
     {name: 'holeWallHeight', caption: 'Hole protection wall H:', type: 'float', step: 0.1, initial: defaults.holeWallHeight},
